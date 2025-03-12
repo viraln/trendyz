@@ -3,6 +3,9 @@ const fs = require("fs").promises;
 const path = require("path");
 const FormData = require("form-data");
 
+// Constants
+const ADSENSE_CLIENT = "ca-pub-7120248945278154";
+
 // Utility functions
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const retry = async (fn, retries = 3, delay = 2000) => {
@@ -104,25 +107,22 @@ async function generateArticle(topic = "tech") {
         // Create suggestions section
         const suggestions = relatedTopics.map(prompt => {
             const slug = sanitizeTitle(prompt);
-            return `- [${prompt}](https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec?topic=${encodeURIComponent(prompt)}&slug=${slug})`;
+            return `- [${prompt}](https://viraln.github.io/trendyz/articles/${slug})`;
         }).join("\n");
 
-        // Add monetization elements
+        // Add AdSense
         const adSenseMid = `
 <div class="ad-break">
     <ins class="adsbygoogle"
          style="display:block"
-         data-ad-client="${process.env.ADSENSE_CLIENT}"
-         data-ad-slot="${process.env.ADSENSE_SLOT_MID}"
+         data-ad-client="${ADSENSE_CLIENT}"
+         data-ad-slot="article-mid"
          data-ad-format="auto"
          data-full-width-responsive="true"></ins>
-    <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+    <script>
+         (adsbygoogle = window.adsbygoogle || []).push({});
+    </script>
 </div>`;
-
-        const affiliateLinks = [
-            `[Top ${topic} Products](https://amazon.com/s?k=${encodeURIComponent(topic)}&tag=${process.env.AMAZON_AFFILIATE_ID})`,
-            `[${topic} Courses](https://udemy.com/courses/search/?q=${encodeURIComponent(topic)}&ref=${process.env.UDEMY_AFFILIATE_ID})`
-        ].join("\n");
 
         // Format the article
         const date = new Date().toISOString();
@@ -145,10 +145,6 @@ ${articleText.split("\n\n")[0]}
 ${adSenseMid}
 
 ${articleText.split("\n\n").slice(1).join("\n\n")}
-
-## Recommended Products and Resources
-
-${affiliateLinks}
 
 ## Continue Exploring
 
